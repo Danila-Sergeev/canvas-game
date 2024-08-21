@@ -4,8 +4,8 @@ import { useRef, useEffect, useState } from "react";
 const Canvas = (props) => {
   const ref = useRef();
 
-  const ball1Ref = useRef(createBall(50, 100, 0, 2, 25, "blue"));
-  const ball2Ref = useRef(createBall(props.width - 50, 100, 0, 2, 25, "red"));
+  const ball1Ref = useRef(createBall(50, 100, 0, 0, 25, "blue"));
+  const ball2Ref = useRef(createBall(props.width - 50, 100, 0, 0, 25, "red"));
   const [score1, setScore1] = useState(0); // Счетчик для левого шара
   const [score2, setScore2] = useState(0); // Счетчик для правого шара
   const [isStarted, setIsStarted] = useState(false); // Состояние, отвечающее за старт/стоп
@@ -14,7 +14,62 @@ const Canvas = (props) => {
   const [ball2Speed, setBall2Speed] = useState(0);
   const [ball1Frequency, setBall1Frequency] = useState(1000); // Частота для левого игрока
   const [ball2Frequency, setBall2Frequency] = useState(1000); // Частота для правого игрока
+  const [leftSmallBalls, setLeftSmallBalls] = useState([]); // Массив для маленьких шаров из левого шара
+  const [rightSmallBalls, setRightSmallBalls] = useState([]); // Массив для маленьких шаров из правого шара
+  const [mouseX, setMouseX] = useState(0);
+  const [mouseY, setMouseY] = useState(0);
+  const [isMenuOpen1, setIsMenuOpen1] = useState(false); // Для первого шара
+  const [isMenuOpen2, setIsMenuOpen2] = useState(false); // Для второго шара
+  const [selectedColor1, setSelectedColor1] = useState("blue"); // Для первого шара
+  const [selectedColor2, setSelectedColor2] = useState("red"); // Для второго шара
+  // Функция для открытия/закрытия меню
+  // Функция для открытия/закрытия меню
+  const toggleMenu = (event, ballRef) => {
+    // Получаем координаты клика относительно холста
+    const canvasRect = ref.current.getBoundingClientRect();
+    const mouseX = event.clientX - canvasRect.left;
+    const mouseY = event.clientY - canvasRect.top;
 
+    // Проверяем, был ли клик по шару
+    if (ballRef === ball1Ref) {
+      const ball1X = ball1Ref.current.x;
+      const ball1Y = ball1Ref.current.y;
+      const ball1Radius = ball1Ref.current.radius;
+
+      const isClickOnBall1 =
+        mouseX >= ball1X - ball1Radius &&
+        mouseX <= ball1X + ball1Radius &&
+        mouseY >= ball1Y - ball1Radius &&
+        mouseY <= ball1Y + ball1Radius;
+
+      if (isClickOnBall1) {
+        setIsMenuOpen1(!isMenuOpen1);
+      }
+    } else {
+      const ball2X = ball2Ref.current.x;
+      const ball2Y = ball2Ref.current.y;
+      const ball2Radius = ball2Ref.current.radius;
+
+      const isClickOnBall2 =
+        mouseX >= ball2X - ball2Radius &&
+        mouseX <= ball2X + ball2Radius &&
+        mouseY >= ball2Y - ball2Radius &&
+        mouseY <= ball2Y + ball2Radius;
+      if (isClickOnBall2) {
+        setIsMenuOpen2(!isMenuOpen2);
+      }
+    }
+  };
+  // Функция для выбора цвета
+  const handleColorChange1 = (color) => {
+    setSelectedColor1(color);
+    setIsMenuOpen1(false);
+  };
+
+  const handleColorChange2 = (color) => {
+    setSelectedColor2(color);
+    setIsMenuOpen2(false);
+  };
   // Определение createBall вне useEffect
   function createBall(x, y, vx, vy, radius, color) {
     return {
@@ -34,9 +89,6 @@ const Canvas = (props) => {
     };
   }
 
-  const [leftSmallBalls, setLeftSmallBalls] = useState([]); // Массив для маленьких шаров из левого шара
-  const [rightSmallBalls, setRightSmallBalls] = useState([]); // Массив для маленьких шаров из правого шара
-
   const generateSmallBallLeft = () => {
     setLeftSmallBalls((prevSmallBalls) => {
       const newSmallBall = createBall(
@@ -45,7 +97,7 @@ const Canvas = (props) => {
         5,
         0,
         10,
-        "blue"
+        selectedColor1
       );
       return [...prevSmallBalls, newSmallBall];
     });
@@ -59,21 +111,60 @@ const Canvas = (props) => {
         -5,
         0,
         10,
-        "red"
+        selectedColor2
       );
       return [...prevSmallBalls, newSmallBall];
     });
-  };
-
-  // Функция для изменения скорости шара
-  const updateBallSpeed = (ballRef, newSpeed) => {
-    ballRef.current.vy = newSpeed;
   };
 
   // Обработчик клика на кнопке старт/стоп
   const handleStartStop = () => {
     setIsStarted(!isStarted);
   };
+
+  // Функция для изменения скорости шара
+  const updateBallSpeed = (ballRef, newSpeed) => {
+    // Учитываем текущее направление движения
+    if (ballRef.current.vy > 0 && newSpeed < 0) {
+      // Если шар двигался вверх, а новая скорость отрицательная,
+      // нужно изменить направление движения
+      newSpeed = Math.abs(newSpeed); // Делаем скорость положительной
+    } else if (ballRef.current.vy < 0 && newSpeed > 0) {
+      // Если шар двигался вниз, а новая скорость положительная,
+      // нужно изменить направление движения
+      newSpeed = -Math.abs(newSpeed); // Делаем скорость отрицательной
+    }
+    ballRef.current.vy = newSpeed;
+  };
+
+  // Обработчик движения мыши
+  const handleMouseMove = (event) => {
+    const canvasRect = ref.current.getBoundingClientRect();
+    const ball = ball1Ref.current;
+    setMouseX(event.clientX - canvasRect.left);
+    setMouseY(event.clientY - canvasRect.top);
+
+    const distanceX = Math.abs(mouseX - ball.x);
+    const distanceY = Math.abs(mouseY - ball.y);
+  };
+
+  useEffect(() => {
+    const ball = ball1Ref.current;
+    /* console.log(mouseY); */
+    if (
+      (mouseY >= ball.y - ball.radius - 5 && // Отступ от верхней границы (5 пикселей)
+        mouseY <= ball.y - ball.radius + 5 && // Отступ от верхней границы (5 пикселей)
+        mouseX >= ball.x - ball.radius && // Дополнительная проверка по X для верхней границы
+        mouseX <= ball.x + ball.radius) || // Дополнительная проверка по X для верхней границы
+      (mouseY >= ball.y + ball.radius - 5 && // Отступ от нижней границы (5 пикселей)
+        mouseY <= ball.y + ball.radius + 5 && // Отступ от нижней границы (5 пикселей)
+        mouseX >= ball.x - ball.radius && // Дополнительная проверка по X для нижней границы
+        mouseX <= ball.x + ball.radius) // Дополнительная проверка по X для нижней границы
+    ) {
+      // Столкновение с верхней или нижней границей, отталкиваем шар
+      ball.vy = -ball.vy;
+    }
+  }, [ball1Ref.current.y]);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -86,11 +177,16 @@ const Canvas = (props) => {
 
       // Draw each ball
       ball1Ref.current.draw(ctx);
+      ball2Ref.current.draw(ctx);
+
       // Обновляем скорость шаров в каждой итерации анимации
       ball1Ref.current.y += ball1Ref.current.vy; // Обновляем координату y шара
-
-      ball2Ref.current.draw(ctx);
       ball2Ref.current.y += ball2Ref.current.vy; // Обновляем координату y шара
+      // Проверка столкновения с курсором для каждого шара
+
+      // Проверка столкновения с курсором для каждого шара
+      // Передаем mouseX и mouseY в качестве аргументов
+      /*  checkCollisionWithCursor(ball2Ref, mouseX, mouseY); */ // Передаем mouseX и mouseY в качестве аргументов
 
       // Bounce off top and bottom boundaries
       if (
@@ -139,8 +235,17 @@ const Canvas = (props) => {
     // Start the animation
     animateBalls();
 
-    return () => window.cancelAnimationFrame(animationId);
-  }); // Remove handleClick from dependency array
+    return () => {
+      window.cancelAnimationFrame(animationId);
+    };
+  }, [
+    ball1Speed,
+    ball2Speed,
+    leftSmallBalls,
+    rightSmallBalls,
+    selectedColor1,
+    selectedColor2,
+  ]); // Remove handleClick from dependency array
 
   useEffect(() => {
     let intervalIdLeft;
@@ -160,7 +265,13 @@ const Canvas = (props) => {
       clearInterval(intervalIdLeft);
       clearInterval(intervalIdRight);
     };
-  }, [isStarted, ball1Frequency, ball2Frequency]); // Зависимость от isStarted
+  }, [
+    isStarted,
+    ball1Frequency,
+    ball2Frequency,
+    selectedColor1,
+    selectedColor2,
+  ]); // Зависимость от isStarted
 
   // Функция для проверки столкновения
   function checkCollision(ball1, ball2) {
@@ -183,9 +294,52 @@ const Canvas = (props) => {
       <button onClick={handleStartStop} className={Styles.startBtn}>
         {isStarted ? "Стоп" : "Старт"}
       </button>
+      {isMenuOpen1 && (
+        <div className={Styles.menu1}>
+          <h2>Выбор цвета</h2>
+          <button
+            onClick={() => handleColorChange1("blue")}
+            className={Styles.colorButton}
+            style={{ backgroundColor: "blue" }}
+          />
+          <button
+            onClick={() => handleColorChange1("red")}
+            className={Styles.colorButton}
+            style={{ backgroundColor: "red" }}
+          />
+          <button
+            onClick={() => handleColorChange1("green")}
+            className={Styles.colorButton}
+            style={{ backgroundColor: "green" }}
+          />
+          {/* Добавьте другие цвета по необходимости */}
+        </div>
+      )}
+
+      {isMenuOpen2 && (
+        <div className={Styles.menu2}>
+          <h2>Выбор цвета</h2>
+          <button
+            onClick={() => handleColorChange2("blue")}
+            className={Styles.colorButton}
+            style={{ backgroundColor: "blue" }}
+          />
+          <button
+            onClick={() => handleColorChange2("red")}
+            className={Styles.colorButton}
+            style={{ backgroundColor: "red" }}
+          />
+          <button
+            onClick={() => handleColorChange2("green")}
+            className={Styles.colorButton}
+            style={{ backgroundColor: "green" }}
+          />
+          {/* Добавьте другие цвета по необходимости */}
+        </div>
+      )}
+
       <div className={Styles.box}>
         <h1 className={Styles.text}>Получено урона: {score1}</h1>
-        <p className={Styles.text}>Здоровье: {100 - score1}</p>
         <label htmlFor="ball1-frequency">Скорость левого игрока:</label>
         <input
           type="range"
@@ -216,10 +370,44 @@ const Canvas = (props) => {
         style={{
           backgroundImage: `url("https://klike.net/uploads/posts/2022-09/1662044139_j-17.jpg")`,
         }}
+        onMouseMove={handleMouseMove}
+        onClick={(event) => {
+          // Получаем координаты клика относительно холста
+          const canvasRect = ref.current.getBoundingClientRect();
+          const mouseX = event.clientX - canvasRect.left;
+          const mouseY = event.clientY - canvasRect.top;
+
+          // Проверяем, был ли клик по первому шару
+          const ball1X = ball1Ref.current.x;
+          const ball1Y = ball1Ref.current.y;
+          const ball1Radius = ball1Ref.current.radius;
+
+          const isClickOnBall1 =
+            mouseX >= ball1X - ball1Radius &&
+            mouseX <= ball1X + ball1Radius &&
+            mouseY >= ball1Y - ball1Radius &&
+            mouseY <= ball1Y + ball1Radius;
+
+          // Проверяем, был ли клик по второму шару
+          const ball2X = ball2Ref.current.x;
+          const ball2Y = ball2Ref.current.y;
+          const ball2Radius = ball2Ref.current.radius;
+
+          const isClickOnBall2 =
+            mouseX >= ball2X - ball2Radius &&
+            mouseX <= ball2X + ball2Radius &&
+            mouseY >= ball2Y - ball2Radius &&
+            mouseY <= ball2Y + ball2Radius;
+
+          if (isClickOnBall1) {
+            toggleMenu(event, ball1Ref); // Передаем ball1Ref в toggleMenu
+          } else if (isClickOnBall2) {
+            toggleMenu(event, ball2Ref); // Передаем ball2Ref в toggleMenu
+          }
+        }}
       />
       <div className={Styles.box}>
         <h1 className={Styles.text}>Получено урона: {score2}</h1>
-        <p className={Styles.text}>Здоровье: {100 - score2}</p>
         <label htmlFor="ball1-frequency">Скорость правого игрока:</label>
         <input
           type="range"
