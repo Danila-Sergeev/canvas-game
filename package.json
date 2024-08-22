@@ -2,7 +2,7 @@
   "name": "canvas-test",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://Danila-Sergeev.github.io/canvas-game",
+  "homepage": "https://danila-sergeev.github.io/canvas-game/",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
