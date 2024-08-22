@@ -2,6 +2,13 @@ canvas {
   border: 1px solid rgb(54, 26, 217);
   border-radius: 8px;
 }
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: black;
+}
 .box {
   margin: 50px;
   padding: 15px;
@@ -24,13 +31,13 @@ canvas {
   font-size: 40px;
   background-color: rgb(196, 20, 202);
   border-radius: 20px;
-  border: none;
   font-weight: 600;
+  border: 2px solid rgb(54, 26, 217);
 }
 .menu1 {
   position: fixed; /* Фиксированное позиционирование */
-  top: 20%;
-  left: 10%;
+  top: 10%;
+  left: 20%;
   transform: translate(-50%, -50%); /* Центрируем меню */
   background-color: rgb(196, 20, 202);
   padding: 20px;
@@ -41,10 +48,11 @@ canvas {
   flex-direction: column;
   align-items: center;
   gap: 10px; /* Пробел между кнопками */
+  border: 2px solid rgb(54, 26, 217);
 }
 .menu2 {
   position: fixed; /* Фиксированное позиционирование */
-  top: 20%;
+  top: 10%;
   right: 0%;
   transform: translate(-50%, -50%); /* Центрируем меню */
   background-color: rgb(196, 20, 202);
@@ -56,14 +64,28 @@ canvas {
   flex-direction: column;
   align-items: center;
   gap: 10px; /* Пробел между кнопками */
+  border: 2px solid rgb(54, 26, 217);
 }
 
 .colorButton {
-  display: block;
-  width: 50px;
-  height: 50px;
+  width: 40px; /* Сделали кнопки немного меньше */
+  height: 40px; /* Сделали кнопки немного меньше */
   border: none;
-  border-radius: 50%;
-  margin: 10px auto;
+  border-radius: 50%; /* Круглые кнопки */
   cursor: pointer;
+}
+.menuBox {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Равномерно распределяем кнопки в две колонки */
+  gap: 10px;
+}
+.close {
+  background-color: inherit;
+  border: none;
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  font-weight: 600;
+  font-size: 25px;
 }
