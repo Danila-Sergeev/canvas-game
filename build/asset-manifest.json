@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/static/css/main.9aeef508.css",
-    "main.js": "/static/js/main.141da74d.js",
-    "index.html": "/index.html",
-    "main.9aeef508.css.map": "/static/css/main.9aeef508.css.map",
-    "main.141da74d.js.map": "/static/js/main.141da74d.js.map"
+    "main.css": "/canvas-game/static/css/main.9aeef508.css",
+    "main.js": "/canvas-game/static/js/main.141da74d.js",
+    "index.html": "/canvas-game/index.html",
+    "main.9aeef508.css.map": "/canvas-game/static/css/main.9aeef508.css.map",
+    "main.141da74d.js.map": "/canvas-game/static/js/main.141da74d.js.map"
   },
   "entrypoints": [
     "static/css/main.9aeef508.css",
