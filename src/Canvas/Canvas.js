@@ -1,3 +1,4 @@
+import Popap from "../components/Popap/Popap";
 import Styles from "./Canvas.module.css";
 import { useRef, useEffect, useState, useCallback } from "react";
 
@@ -42,32 +43,33 @@ const Canvas = (props) => {
     };
   }
 
-  const generateSmallBallLeft = () => {
-    setLeftSmallBalls((prevSmallBalls) => {
-      const newSmallBall = createBall(
-        ball1Ref.current.x + ball1Ref.current.radius,
-        ball1Ref.current.y,
-        5,
-        0,
-        10,
-        selectedColor1
-      );
-      return [...prevSmallBalls, newSmallBall];
-    });
-  };
-
-  const generateSmallBallRight = () => {
-    setRightSmallBalls((prevSmallBalls) => {
-      const newSmallBall = createBall(
-        ball2Ref.current.x - ball2Ref.current.radius,
-        ball2Ref.current.y,
-        -5,
-        0,
-        10,
-        selectedColor2
-      );
-      return [...prevSmallBalls, newSmallBall];
-    });
+  //Функция генерации маленьких шаров
+  const generateSmallBall = (ballRef, selectedColor) => {
+    if (ballRef === ball1Ref) {
+      setLeftSmallBalls((prevSmallBalls) => {
+        const newSmallBall = createBall(
+          ballRef.current.x + ballRef.current.radius,
+          ballRef.current.y,
+          5,
+          0,
+          10,
+          selectedColor
+        );
+        return [...prevSmallBalls, newSmallBall];
+      });
+    } else {
+      setRightSmallBalls((prevSmallBalls) => {
+        const newSmallBall = createBall(
+          ballRef.current.x - ballRef.current.radius,
+          ballRef.current.y,
+          -5,
+          0,
+          10,
+          selectedColor
+        );
+        return [...prevSmallBalls, newSmallBall];
+      });
+    }
   };
 
   // Обработчик клика на кнопке старт/стоп
@@ -127,6 +129,7 @@ const Canvas = (props) => {
       }
     }
   };
+
   // Функция для выбора цвета
   const handleColorChange = (color, ballRef) => {
     if (ballRef === ball1Ref) {
@@ -138,6 +141,43 @@ const Canvas = (props) => {
       setIsMenuOpen2(false);
     }
   };
+
+  //Событие клика на игрока открытие модального окна
+  const onElementClick = (event) => {
+    // Получаем координаты клика относительно холста
+    const canvasRect = ref.current.getBoundingClientRect();
+    const mouseX = event.clientX - canvasRect.left;
+    const mouseY = event.clientY - canvasRect.top;
+
+    // Проверяем, был ли клик по первому шару
+    const ball1X = ball1Ref.current.x;
+    const ball1Y = ball1Ref.current.y;
+    const ball1Radius = ball1Ref.current.radius;
+
+    const isClickOnBall1 =
+      mouseX >= ball1X - ball1Radius &&
+      mouseX <= ball1X + ball1Radius &&
+      mouseY >= ball1Y - ball1Radius &&
+      mouseY <= ball1Y + ball1Radius;
+
+    // Проверяем, был ли клик по второму шару
+    const ball2X = ball2Ref.current.x;
+    const ball2Y = ball2Ref.current.y;
+    const ball2Radius = ball2Ref.current.radius;
+
+    const isClickOnBall2 =
+      mouseX >= ball2X - ball2Radius &&
+      mouseX <= ball2X + ball2Radius &&
+      mouseY >= ball2Y - ball2Radius &&
+      mouseY <= ball2Y + ball2Radius;
+
+    if (isClickOnBall1) {
+      toggleMenu(event, ball1Ref); // Передаем ball1Ref в toggleMenu
+    } else if (isClickOnBall2) {
+      toggleMenu(event, ball2Ref); // Передаем ball2Ref в toggleMenu
+    }
+  };
+
   // Обработчик закрытия попап
   const handleClosePopap = (ballRef) => {
     ballRef === ball1Ref
@@ -152,6 +192,7 @@ const Canvas = (props) => {
     );
     return distance <= ball1.radius + ball2.radius;
   }
+
   // Функция для проверки столкновения с курсором
   function checkCollisionMouse(ball, mouseX, mouseY) {
     const distance = Math.sqrt(
@@ -162,13 +203,10 @@ const Canvas = (props) => {
 
   // Обработчик движения мыши
   const handleMouseMove = (event) => {
+    //Считываем координаты курсора в поле canvas
     const canvasRect = ref.current.getBoundingClientRect();
-    const ball = ball1Ref.current;
     setMouseX(event.clientX - canvasRect.left);
     setMouseY(event.clientY - canvasRect.top);
-
-    const distanceX = Math.abs(mouseX - ball.x);
-    const distanceY = Math.abs(mouseY - ball.y);
   };
 
   // Функция для анимирования всех шаров
@@ -179,6 +217,15 @@ const Canvas = (props) => {
       ball1Ref.current.draw(ctx);
       ball2Ref.current.draw(ctx);
 
+      if (!isStarted) {
+        updateBallSpeed(ball1Ref, 2);
+        setBall1Speed(2);
+        updateBallSpeed(ball2Ref, 2);
+        setBall2Speed(2);
+
+        setBall1Frequency(1000);
+        setBall2Frequency(1000);
+      }
       // Обновляем скорость шаров в каждой итерации анимации
       ball1Ref.current.y += ball1Ref.current.vy; // Обновляем координату y шара
       ball2Ref.current.y += ball2Ref.current.vy; // Обновляем координату y шара
@@ -197,7 +244,7 @@ const Canvas = (props) => {
         ball2Ref.current.vy = -ball2Ref.current.vy;
       }
 
-      // Draw and animate small balls
+      // Рисуем и анимируем маленькие шарики
       leftSmallBalls.forEach((ball, index) => {
         ball.draw(ctx);
         ball.x += ball.vx;
@@ -228,19 +275,20 @@ const Canvas = (props) => {
     [leftSmallBalls, rightSmallBalls, isStarted]
   );
 
+  //useEffect для реализации отталкивания от курсора
   useEffect(() => {
     const ball1 = ball1Ref.current; // Выбираем  шар
     const ball2 = ball2Ref.current; // Выбираем  шар
     const interval = setInterval(() => {
-      // Проверяем, неподвижен ли курсор
+      // Проверяем, не находится ли курсор внутри шара
+
+      // Отталкивание, если курсор НЕ внутри шара 1
       if (checkCollisionMouse(ball1, mouseX, mouseY)) {
-        // Проверяем столкновение по всей площади шара
-        // Столкновение с курсором, отталкиваем шар
         ball1.vy = -ball1.vy;
       }
+
+      // Отталкивание, если курсор НЕ внутри шара 2
       if (checkCollisionMouse(ball2, mouseX, mouseY)) {
-        // Проверяем столкновение по всей площади шара
-        // Столкновение с курсором, отталкиваем шар
         ball2.vy = -ball2.vy;
       }
     }, 10);
@@ -273,10 +321,10 @@ const Canvas = (props) => {
     if (isStarted) {
       // Запускаем интервалы только если isStarted true
       intervalIdLeft = setInterval(() => {
-        generateSmallBallLeft();
+        generateSmallBall(ball1Ref, selectedColor1);
       }, ball1Frequency);
       intervalIdRight = setInterval(() => {
-        generateSmallBallRight();
+        generateSmallBall(ball2Ref, selectedColor2);
       }, ball2Frequency);
     } else {
       setScore1(0);
@@ -303,95 +351,21 @@ const Canvas = (props) => {
 
       {/* Модальные окна для изменения цвета снаряда */}
       {isMenuOpen1 && (
-        <div className={Styles.menu1}>
-          <h2>Выбор цвета</h2>
-          <button
-            onClick={() => handleClosePopap(ball1Ref)}
-            className={Styles.close}
-          >
-            x
-          </button>
-          <div className={Styles.menuBox}>
-            <button
-              onClick={() => handleColorChange("blue", ball1Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "blue" }}
-            />
-            <button
-              onClick={() => handleColorChange("Yellow", ball1Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "Yellow" }}
-            />
-            <button
-              onClick={() => handleColorChange("green", ball1Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "green" }}
-            />
-            <button
-              onClick={() => handleColorChange("Aqua", ball1Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "Aqua" }}
-            />
-            <button
-              onClick={() => handleColorChange("Snow", ball1Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "Snow" }}
-            />
-            <button
-              onClick={() => handleColorChange("Lime", ball1Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "Lime" }}
-            />
-          </div>
-          {/* Добавьте другие цвета по необходимости */}
-        </div>
+        <Popap
+          ballRef={ball1Ref}
+          handleClosePopap={handleClosePopap}
+          handleColorChange={handleColorChange}
+          ball1Ref={true}
+        />
       )}
 
       {isMenuOpen2 && (
-        <div className={Styles.menu2}>
-          <h2>Выбор цвета</h2>
-          <button
-            onClick={() => handleClosePopap(ball2Ref)}
-            className={Styles.close}
-          >
-            x
-          </button>
-          <div className={Styles.menuBox}>
-            <button
-              onClick={() => handleColorChange("red", ball2Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "red" }}
-            />
-            <button
-              onClick={() => handleColorChange("Orange", ball2Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "Orange" }}
-            />
-
-            <button
-              onClick={() => handleColorChange("Purple", ball2Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "Purple" }}
-            />
-            <button
-              onClick={() => handleColorChange("Silver", ball2Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "Silver" }}
-            />
-            <button
-              onClick={() => handleColorChange("SaddleBrown", ball2Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "SaddleBrown" }}
-            />
-            <button
-              onClick={() => handleColorChange("Fuchsia", ball2Ref)}
-              className={Styles.colorButton}
-              style={{ backgroundColor: "Fuchsia" }}
-            />
-          </div>
-
-          {/* Добавьте другие цвета по необходимости */}
-        </div>
+        <Popap
+          ballRef={ball2Ref}
+          handleClosePopap={handleClosePopap}
+          handleColorChange={handleColorChange}
+          ball1Ref={false}
+        />
       )}
       {/*  Настойки игрока 1 */}
       <div className={Styles.box}>
@@ -423,43 +397,9 @@ const Canvas = (props) => {
       <canvas
         ref={ref}
         {...props}
-        style={{
-          backgroundImage: `url("https://klike.net/uploads/posts/2022-09/1662044139_j-17.jpg")`,
-        }}
         onMouseMove={handleMouseMove}
         onClick={(event) => {
-          // Получаем координаты клика относительно холста
-          const canvasRect = ref.current.getBoundingClientRect();
-          const mouseX = event.clientX - canvasRect.left;
-          const mouseY = event.clientY - canvasRect.top;
-
-          // Проверяем, был ли клик по первому шару
-          const ball1X = ball1Ref.current.x;
-          const ball1Y = ball1Ref.current.y;
-          const ball1Radius = ball1Ref.current.radius;
-
-          const isClickOnBall1 =
-            mouseX >= ball1X - ball1Radius &&
-            mouseX <= ball1X + ball1Radius &&
-            mouseY >= ball1Y - ball1Radius &&
-            mouseY <= ball1Y + ball1Radius;
-
-          // Проверяем, был ли клик по второму шару
-          const ball2X = ball2Ref.current.x;
-          const ball2Y = ball2Ref.current.y;
-          const ball2Radius = ball2Ref.current.radius;
-
-          const isClickOnBall2 =
-            mouseX >= ball2X - ball2Radius &&
-            mouseX <= ball2X + ball2Radius &&
-            mouseY >= ball2Y - ball2Radius &&
-            mouseY <= ball2Y + ball2Radius;
-
-          if (isClickOnBall1) {
-            toggleMenu(event, ball1Ref); // Передаем ball1Ref в toggleMenu
-          } else if (isClickOnBall2) {
-            toggleMenu(event, ball2Ref); // Передаем ball2Ref в toggleMenu
-          }
+          onElementClick(event);
         }}
       />
       {/*  Настройки игрока 2 */}

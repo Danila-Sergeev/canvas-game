@@ -1,0 +1,54 @@
+.menuBox {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Равномерно распределяем кнопки в две колонки */
+  gap: 10px;
+}
+.close {
+  background-color: inherit;
+  border: none;
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  font-weight: 600;
+  font-size: 25px;
+}
+.menuRight {
+  position: fixed; /* Фиксированное позиционирование */
+  top: 10%;
+  left: 20%;
+  transform: translate(-50%, -50%); /* Центрируем меню */
+  background-color: rgb(196, 20, 202);
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Тень */
+  z-index: 100; /* Устанавливаем z-index, чтобы меню было поверх других элементов */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Пробел между кнопками */
+  border: 2px solid rgb(54, 26, 217);
+}
+.menuLeft {
+  position: fixed; /* Фиксированное позиционирование */
+  top: 10%;
+  right: 0%;
+  transform: translate(-50%, -50%); /* Центрируем меню */
+  background-color: rgb(196, 20, 202);
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Тень */
+  z-index: 100; /* Устанавливаем z-index, чтобы меню было поверх других элементов */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Пробел между кнопками */
+  border: 2px solid rgb(54, 26, 217);
+}
+.colorButton {
+  width: 40px; /* Сделали кнопки немного меньше */
+  height: 40px; /* Сделали кнопки немного меньше */
+  border: none;
+  border-radius: 50%; /* Круглые кнопки */
+  cursor: pointer;
+}

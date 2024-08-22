@@ -1,6 +1,7 @@
 canvas {
   border: 1px solid rgb(54, 26, 217);
   border-radius: 8px;
+  background-image: url("https://klike.net/uploads/posts/2022-09/1662044139_j-17.jpg");
 }
 .main {
   display: flex;
@@ -34,39 +35,6 @@ canvas {
   font-weight: 600;
   border: 2px solid rgb(54, 26, 217);
 }
-.menu1 {
-  position: fixed; /* Фиксированное позиционирование */
-  top: 10%;
-  left: 20%;
-  transform: translate(-50%, -50%); /* Центрируем меню */
-  background-color: rgb(196, 20, 202);
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Тень */
-  z-index: 100; /* Устанавливаем z-index, чтобы меню было поверх других элементов */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px; /* Пробел между кнопками */
-  border: 2px solid rgb(54, 26, 217);
-}
-.menu2 {
-  position: fixed; /* Фиксированное позиционирование */
-  top: 10%;
-  right: 0%;
-  transform: translate(-50%, -50%); /* Центрируем меню */
-  background-color: rgb(196, 20, 202);
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Тень */
-  z-index: 100; /* Устанавливаем z-index, чтобы меню было поверх других элементов */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px; /* Пробел между кнопками */
-  border: 2px solid rgb(54, 26, 217);
-}
-
 .colorButton {
   width: 40px; /* Сделали кнопки немного меньше */
   height: 40px; /* Сделали кнопки немного меньше */
